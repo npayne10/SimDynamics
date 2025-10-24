@@ -30,6 +30,13 @@ static const float ACCEL_MM_S2     = 600.0f;
 static const float HOME_SPEED_MM_S = 20.0f;    // approach speed towards bottom
 static const float HOME_BACKOFF_MM = 3.0f;     // lift off switch after homing
 
+// Self-test motion envelope
+static const float SELFTEST_BASE_MM    = MIN_POS_MM + (STROKE_MM * 0.5f);
+static const float SELFTEST_ROLL_MM    = STROKE_MM * 0.25f;
+static const float SELFTEST_PITCH_MM   = STROKE_MM * 0.25f;
+static const float SELFTEST_HEAVE_MM   = STROKE_MM * 0.20f;
+static const unsigned long SELFTEST_PAUSE_MS = 500;
+
 // Serial
 static const uint32_t SERIAL_BAUD = 115200;
 static const bool SERIAL_ECHO = false;
@@ -61,6 +68,10 @@ static inline float clampFloat(float v, float lo, float hi) {
   if (v < lo) return lo;
   if (v > hi) return hi;
   return v;
+}
+
+static float clampToStroke(float mm) {
+  return clampFloat(mm, MIN_POS_MM, MAX_POS_MM);
 }
 
 static bool rawLimitTriggered(uint8_t pin) {
@@ -206,6 +217,130 @@ static void updateTargets() {
   }
 }
 
+static void moveToPositionsBlocking(const float mmTargets[AXES]) {
+  for (uint8_t i = 0; i < AXES; ++i) {
+    float desired = clampToStroke(mmTargets[i]);
+    targetMM[i] = desired;
+    long steps = lround(mmToSteps(desired));
+    targetSteps[i] = steps;
+    steppers[i].moveTo(steps);
+  }
+
+  bool anyMoving;
+  do {
+    anyMoving = false;
+    sampleLimits();
+    updateTargets();
+    for (uint8_t i = 0; i < AXES; ++i) {
+      if (steppers[i].distanceToGo() != 0) {
+        anyMoving = true;
+      }
+      steppers[i].run();
+    }
+  } while (anyMoving);
+}
+
+static void pauseForSettle() {
+  unsigned long start = millis();
+  while (millis() - start < SELFTEST_PAUSE_MS) {
+    sampleLimits();
+    updateTargets();
+    for (uint8_t i = 0; i < AXES; ++i) {
+      steppers[i].run();
+    }
+  }
+}
+
+static void performLimitTest() {
+  Serial.println(F("Self-test: limit sweep to top."));
+  float topTargets[AXES];
+  for (uint8_t i = 0; i < AXES; ++i) {
+    topTargets[i] = MAX_POS_MM;
+  }
+  moveToPositionsBlocking(topTargets);
+  pauseForSettle();
+
+  Serial.println(F("Self-test: limit sweep to bottom."));
+  float bottomTargets[AXES];
+  for (uint8_t i = 0; i < AXES; ++i) {
+    bottomTargets[i] = MIN_POS_MM + HOME_BACKOFF_MM;
+  }
+  moveToPositionsBlocking(bottomTargets);
+  pauseForSettle();
+}
+
+static void performRollTest() {
+  Serial.println(F("Self-test: roll motion."));
+  float rollUp[AXES] = {
+    clampToStroke(SELFTEST_BASE_MM + SELFTEST_ROLL_MM),
+    clampToStroke(SELFTEST_BASE_MM - SELFTEST_ROLL_MM),
+    clampToStroke(SELFTEST_BASE_MM + SELFTEST_ROLL_MM),
+    clampToStroke(SELFTEST_BASE_MM - SELFTEST_ROLL_MM)
+  };
+  moveToPositionsBlocking(rollUp);
+  pauseForSettle();
+
+  float rollDown[AXES] = {
+    clampToStroke(SELFTEST_BASE_MM - SELFTEST_ROLL_MM),
+    clampToStroke(SELFTEST_BASE_MM + SELFTEST_ROLL_MM),
+    clampToStroke(SELFTEST_BASE_MM - SELFTEST_ROLL_MM),
+    clampToStroke(SELFTEST_BASE_MM + SELFTEST_ROLL_MM)
+  };
+  moveToPositionsBlocking(rollDown);
+  pauseForSettle();
+}
+
+static void performPitchTest() {
+  Serial.println(F("Self-test: pitch motion."));
+  float pitchForward[AXES] = {
+    clampToStroke(SELFTEST_BASE_MM + SELFTEST_PITCH_MM),
+    clampToStroke(SELFTEST_BASE_MM + SELFTEST_PITCH_MM),
+    clampToStroke(SELFTEST_BASE_MM - SELFTEST_PITCH_MM),
+    clampToStroke(SELFTEST_BASE_MM - SELFTEST_PITCH_MM)
+  };
+  moveToPositionsBlocking(pitchForward);
+  pauseForSettle();
+
+  float pitchBackward[AXES] = {
+    clampToStroke(SELFTEST_BASE_MM - SELFTEST_PITCH_MM),
+    clampToStroke(SELFTEST_BASE_MM - SELFTEST_PITCH_MM),
+    clampToStroke(SELFTEST_BASE_MM + SELFTEST_PITCH_MM),
+    clampToStroke(SELFTEST_BASE_MM + SELFTEST_PITCH_MM)
+  };
+  moveToPositionsBlocking(pitchBackward);
+  pauseForSettle();
+}
+
+static void performHeaveTest() {
+  Serial.println(F("Self-test: heave motion."));
+  float heaveUp[AXES];
+  float heaveDown[AXES];
+  for (uint8_t i = 0; i < AXES; ++i) {
+    heaveUp[i] = clampToStroke(SELFTEST_BASE_MM + SELFTEST_HEAVE_MM);
+    heaveDown[i] = clampToStroke(SELFTEST_BASE_MM - SELFTEST_HEAVE_MM);
+  }
+  moveToPositionsBlocking(heaveUp);
+  pauseForSettle();
+  moveToPositionsBlocking(heaveDown);
+  pauseForSettle();
+}
+
+static void runSelfTest() {
+  Serial.println(F("--- Actuator self-test start ---"));
+  performLimitTest();
+  performRollTest();
+  performPitchTest();
+  performHeaveTest();
+
+  float neutral[AXES];
+  for (uint8_t i = 0; i < AXES; ++i) {
+    neutral[i] = clampToStroke(SELFTEST_BASE_MM);
+  }
+  moveToPositionsBlocking(neutral);
+  pauseForSettle();
+  Serial.println(F("--- Actuator self-test complete ---"));
+}
+
 // ----------------------------------------------------------------------------
 void setup() {
   Serial.begin(SERIAL_BAUD);
@@ -226,6 +361,7 @@ void setup() {
 
   sampleLimits();
   homeAll();
+  runSelfTest();
 
   Serial.println(F("SimTools 4-Axis Controller ready."));
   Serial.println(F("Expecting packets: <A1><Axis1a>~<A2><Axis2a>~<A3><Axis3a>~<A4><Axis4a>~"));
