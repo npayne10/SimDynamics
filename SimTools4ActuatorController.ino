@@ -130,15 +130,25 @@ static void homeAll() {
 // ----------------------------------------------------------------------------
 static int extractAxisValue(const String &token) {
   int n = token.length();
+  int bestStart = -1;
+  int bestLen = 0;
+
   for (int i = 0; i < n; ++i) {
     if (isDigit(token[i])) {
-      int value = 0;
+      int start = i;
       while (i < n && isDigit(token[i])) {
-        value = value * 10 + (token[i] - '0');
         ++i;
       }
-      return value;
+      int len = i - start;
+      if (len >= bestLen) {
+        bestLen = len;
+        bestStart = start;
+      }
     }
+  }
+
+  if (bestStart >= 0) {
+    return token.substring(bestStart, bestStart + bestLen).toInt();
   }
   return -1;
 }
