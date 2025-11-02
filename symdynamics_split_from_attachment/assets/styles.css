@@ -69,12 +69,14 @@
     .right{text-align:right}
 
     @media (max-width: 980px){
+      nav{flex-direction:column;align-items:flex-start;height:auto;padding:14px 0}
+      .nav-right{width:100%;flex-direction:column;align-items:flex-start;gap:12px}
+      nav .nav-links{display:flex;flex-direction:column;width:100%;gap:10px}
+      nav .nav-links .btn{width:100%;justify-content:flex-start}
       .hero-grid, .grid-2{grid-template-columns:1fr}
       .grid-3{grid-template-columns:1fr}
       .store-grid{grid-template-columns:1fr}
       .cta-wrap{justify-content:center;text-align:center}
-      /* keep social visible; hide nav links if needed */
-      nav .nav-links{display:none}
     }
 
     /* Notices */
