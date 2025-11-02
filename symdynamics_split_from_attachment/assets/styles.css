@@ -83,10 +83,3 @@
     .notice button{background:transparent;border:0;color:#cbd5e1;cursor:pointer;font-weight:700}
     .notice small{color:#a7b0c2}
   
-      .grid-3{grid-template-columns:1fr}
-      .store-grid{grid-template-columns:1fr}
-      .cta-wrap{justify-content:center;text-align:center}
-      /* keep social visible; hide nav links if needed */
-      nav .nav-links{display:none}
-    }
-  
