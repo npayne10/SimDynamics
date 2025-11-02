@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', function(){
-try{
 
     // ====== CONFIG ======
     const CURRENCY = 'ZAR';
@@ -56,29 +55,31 @@ try{
 
     // ====== RENDER PRODUCTS ======
     const grid = document.getElementById('productGrid');
-    PRODUCTS.forEach(p=>{
-      const el = document.createElement('div');
-      el.className='product';
-      el.innerHTML = `
-        <div class=\"ph\">Image placeholder (${p.name})</div>
-        <div class=\"body\">
-          <strong>${p.name}</strong>
-          <p style=\"color:#a7b0c2;margin:0\">${p.desc}</p>
-          <div class=\"price\">R${p.price.toFixed(2)}</div>
-          <div style=\"display:flex;gap:8px;align-items:center\">
-            <label>Qty <input class=\"qty\" type=\"number\" min=\"1\" value=\"1\"></label>
-            <button class=\"btn add\">Add to Cart</button>
-          </div>
-        </div>`;
-      el.querySelector('.add').addEventListener('click',()=>{
-        const qty = parseInt(el.querySelector('.qty').value||'1');
-        cart[p.id] = (cart[p.id]||0) + Math.max(1, qty);
-        saveCart();
-        renderCart();
-        location.hash = '#cart';
+    if(grid){
+      PRODUCTS.forEach(p=>{
+        const el = document.createElement('div');
+        el.className='product';
+        el.innerHTML = `
+          <div class=\"ph\">Image placeholder (${p.name})</div>
+          <div class=\"body\">
+            <strong>${p.name}</strong>
+            <p style=\"color:#a7b0c2;margin:0\">${p.desc}</p>
+            <div class=\"price\">R${p.price.toFixed(2)}</div>
+            <div style=\"display:flex;gap:8px;align-items:center\">
+              <label>Qty <input class=\"qty\" type=\"number\" min=\"1\" value=\"1\"></label>
+              <button class=\"btn add\">Add to Cart</button>
+            </div>
+          </div>`;
+        el.querySelector('.add').addEventListener('click',()=>{
+          const qty = parseInt(el.querySelector('.qty').value||'1');
+          cart[p.id] = (cart[p.id]||0) + Math.max(1, qty);
+          saveCart();
+          renderCart();
+          location.hash = '#cart';
+        });
+        grid.appendChild(el);
       });
-      grid.appendChild(el);
-    });
+    }
 
     // ====== RENDER AFFILIATES ======
     const affGrid = document.getElementById('affGrid');
@@ -125,6 +126,7 @@ try{
     const shipToEl = document.getElementById('shipTo');
 
     function renderCart(){
+      if(!cartBody || !cartWrap || !cartEmpty || !grandTotalEl){ return 0; }
       const items = Object.entries(cart).map(([id,qty])=>{
         const p = PRODUCTS.find(x=>x.id===id);
         return {...p, qty, line:p.price*qty};
@@ -168,7 +170,7 @@ try{
     function updateShipTo(){
       const u = getUser();
       if(!shipToEl) return;
-      shipToEl.innerHTML = u ? `${u.first_name} ${u.last_name} — ${u.address} (☎ ${u.phone})` : 'Not set — <a href="#register">add your address</a>';
+      shipToEl.innerHTML = u ? `${u.first_name} ${u.last_name} — ${u.address} (☎ ${u.phone})` : 'Not set — <a href="register.html">add your address</a>';
     }
 
     // ====== REGISTRATION FORM HANDLERS ======
@@ -257,12 +259,12 @@ try{
       form.submit();
     }
 
-    document.getElementById('checkoutBtn').addEventListener('click', checkoutWithPayFast);
+    const checkoutBtn = document.getElementById('checkoutBtn');
+    if(checkoutBtn){ checkoutBtn.addEventListener('click', checkoutWithPayFast); }
 
     // year + init
-    document.getElementById('y').textContent = new Date().getFullYear();
+    const yearEl = document.getElementById('y');
+    if(yearEl){ yearEl.textContent = new Date().getFullYear(); }
     document.querySelectorAll('a[href^="#"]').forEach(a=>a.addEventListener('click',e=>{ const id=a.getAttribute('href'); const el=document.querySelector(id); if(el){ e.preventDefault(); el.scrollIntoView({behavior:'smooth'});} }));
     renderCart(); updateCartBadge(); updateNavUser(); updateShipTo();
-  
-}catch(e){console.error(e)}
 });
