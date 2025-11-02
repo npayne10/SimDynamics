@@ -141,24 +141,35 @@ static void homeAll() {
 // ----------------------------------------------------------------------------
 static int extractAxisValue(const String &token) {
   int n = token.length();
+
+  // Skip the leading "<A#>" axis identifier if present so that we only
+  // evaluate the numeric payload that follows.
+  int searchStart = 0;
+  if (token.startsWith("<A")) {
+    int close = token.indexOf('>');
+    if (close != -1) {
+      searchStart = close + 1;
+    }
+  }
+
   int bestStart = -1;
   int bestLen = 0;
 
-  for (int i = 0; i < n; ++i) {
+  for (int i = searchStart; i < n; ++i) {
     if (isDigit(token[i])) {
       int start = i;
       while (i < n && isDigit(token[i])) {
         ++i;
       }
       int len = i - start;
-      if (len >= bestLen) {
+      if (len >= bestLen || bestStart < searchStart) {
         bestLen = len;
         bestStart = start;
       }
     }
   }
 
-  if (bestStart >= 0) {
+  if (bestStart >= searchStart && bestStart >= 0) {
     return token.substring(bestStart, bestStart + bestLen).toInt();
   }
   return -1;
