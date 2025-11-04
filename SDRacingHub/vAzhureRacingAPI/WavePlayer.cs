@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Media;
 
-namespace vAzhureRacingHub
+namespace SDRacingHub
 {
     public class WavePlayer
     {

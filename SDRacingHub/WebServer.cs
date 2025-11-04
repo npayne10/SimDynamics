@@ -8,7 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using vAzhureRacingAPI;
 
-namespace vAzhureRacingHub
+namespace SDRacingHub
 {
     public class WebServer : IDisposable
     {

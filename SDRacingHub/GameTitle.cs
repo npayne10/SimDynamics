@@ -3,7 +3,7 @@ using System.Windows.Forms;
 
 using vAzhureRacingAPI;
 
-namespace vAzhureRacingHub
+namespace SDRacingHub
 {
     class GameTitle : VAzhureTilesControl.VAzhureTileElement
     {

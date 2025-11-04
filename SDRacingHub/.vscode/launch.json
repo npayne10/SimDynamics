@@ -1,0 +1,13 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": ".NET Framework Launch (SDRacingHub)",
+            "type": "clr",
+            "request": "launch",
+            "program": "${workspaceFolder}/bin/Debug/SDRacingHub.exe",
+            "cwd": "${workspaceFolder}/bin/Debug",
+            "preLaunchTask": "build SDRacingHub"
+        }
+    ]
+}

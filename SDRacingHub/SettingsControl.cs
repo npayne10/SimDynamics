@@ -1,6 +1,6 @@
 ﻿using System.Windows.Forms;
 
-namespace vAzhureRacingHub
+namespace SDRacingHub
 {
     public class SettingsControl : UserControl
     {

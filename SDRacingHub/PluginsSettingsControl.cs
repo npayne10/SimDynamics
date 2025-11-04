@@ -4,7 +4,7 @@ using System.Linq;
 using System.Windows.Forms;
 using vAzhureRacingAPI;
 
-namespace vAzhureRacingHub
+namespace SDRacingHub
 {
     public partial class PluginsSettingsControl : SettingsControl
     {

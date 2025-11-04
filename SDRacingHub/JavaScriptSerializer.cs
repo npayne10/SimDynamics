@@ -1,4 +1,4 @@
-﻿namespace vAzhureRacingHub
+﻿namespace SDRacingHub
 {
     internal class JavaScriptSerializer
     {

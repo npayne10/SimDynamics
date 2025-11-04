@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{44ED11E0-0334-4BD6-AFAB-B46D5129E67D}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>vAzhureRacingHub</RootNamespace>
-    <AssemblyName>vAzhureRacingHub</AssemblyName>
+    <RootNamespace>SDRacingHub</RootNamespace>
+    <AssemblyName>SDRacingHub</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -53,13 +53,13 @@
     <ApplicationIcon>icon.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>vAzhureRacingHub.Program</StartupObject>
+    <StartupObject>SDRacingHub.Program</StartupObject>
   </PropertyGroup>
   <PropertyGroup>
     <ManifestCertificateThumbprint>C6BFF5F1BD21EB4A5EBD988CA94C66D36B70B89D</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>vAzhureRacingHub_TemporaryKey.pfx</ManifestKeyFile>
+    <ManifestKeyFile>SDRacingHub_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <GenerateManifests>true</GenerateManifests>
@@ -162,7 +162,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <None Include="vAzhureRacingHub_TemporaryKey.pfx" />
+    <None Include="SDRacingHub_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

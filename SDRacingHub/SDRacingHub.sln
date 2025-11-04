@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.14.36414.22
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "vAzhureRacingHub", "vAzhureRacingHub.csproj", "{44ED11E0-0334-4BD6-AFAB-B46D5129E67D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SDRacingHub", "SDRacingHub.csproj", "{44ED11E0-0334-4BD6-AFAB-B46D5129E67D}"
 	ProjectSection(ProjectDependencies) = postProject
 		{B9FCF55F-72AA-4C47-99BC-3FCCF9904FF6} = {B9FCF55F-72AA-4C47-99BC-3FCCF9904FF6}
 	EndProjectSection

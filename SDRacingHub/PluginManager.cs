@@ -2,7 +2,7 @@
 using System.Reflection;
 using vAzhureRacingAPI;
 
-namespace vAzhureRacingHub
+namespace SDRacingHub
 {
     public static class PluginManager
     {

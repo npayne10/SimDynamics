@@ -72,6 +72,6 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>echo D| xcopy "$(TargetPath)" "C:\ProgramData\vAzhureRacingHub\Plugins\Race07" /e /y /d</PostBuildEvent>
+    <PostBuildEvent>echo D| xcopy "$(TargetPath)" "C:\ProgramData\SDRacingHub\Plugins\Race07" /e /y /d</PostBuildEvent>
   </PropertyGroup>
 </Project>

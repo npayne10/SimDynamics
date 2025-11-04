@@ -13,7 +13,7 @@ namespace KunosPlugin
     {
         public string Name => "Kunos Games";
 
-        public string Description => "Плагин игр AC и ACC для vAzhure Racing Hub\nАвтор: Журавлев Андрей Владимирович";
+        public string Description => "Плагин игр AC и ACC для SDRacingHub\nАвтор: Журавлев Андрей Владимирович";
 
         internal const string cKunosData = "vehicle.json";
 

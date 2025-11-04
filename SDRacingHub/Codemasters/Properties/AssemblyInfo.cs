@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("Codemasters")]
-[assembly: AssemblyDescription("Codemasters Games Plugin for vAzhureRacingHub Application")]
+[assembly: AssemblyDescription("Codemasters Games Plugin for SDRacingHub Application")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("vAzhure Racing")]
 [assembly: AssemblyProduct("Codemasters")]

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using vAzhureRacingAPI;
 
-namespace vAzhureRacingHub
+namespace SDRacingHub
 {
     class DeviceTitle : VAzhureTilesControl.VAzhureTileElement
     {

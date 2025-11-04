@@ -7,7 +7,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace vAzhureRacingHub
+namespace SDRacingHub
 {
     public class WSClient : IDisposable
     {

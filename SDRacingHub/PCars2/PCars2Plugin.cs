@@ -7,7 +7,7 @@ namespace PCars2
     {
         public string Name => "PCars2 / AMS2";
 
-        public string Description => "Плагин Project Cars 2 / Automobilista 2 для vAzhure Racing Hub\nАвтор: Журавлев Андрей";
+        public string Description => "Плагин Project Cars 2 / Automobilista 2 для SDRacingHub\nАвтор: Журавлев Андрей";
 
         public ulong Version => 1L;
 

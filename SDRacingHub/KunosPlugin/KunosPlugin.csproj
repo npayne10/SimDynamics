@@ -78,7 +78,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>echo D| xcopy "$(TargetPath)" "C:\ProgramData\vAzhureRacingHub\Plugins\Kunos" /e /y /d
-echo D| xcopy "$(TargetDir)vehicle.json" "C:\ProgramData\vAzhureRacingHub\Plugins\Kunos" /e /y /d</PostBuildEvent>
+    <PostBuildEvent>echo D| xcopy "$(TargetPath)" "C:\ProgramData\SDRacingHub\Plugins\Kunos" /e /y /d
+echo D| xcopy "$(TargetDir)vehicle.json" "C:\ProgramData\SDRacingHub\Plugins\Kunos" /e /y /d</PostBuildEvent>
   </PropertyGroup>
 </Project>
