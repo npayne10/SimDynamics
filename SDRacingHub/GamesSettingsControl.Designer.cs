@@ -1,5 +1,5 @@
 ﻿
-namespace vAzhureRacingHub
+namespace SDRacingHub
 {
     partial class GamesSettingsControl
     {

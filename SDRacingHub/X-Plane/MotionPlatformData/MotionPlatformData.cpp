@@ -98,7 +98,7 @@ PLUGIN_API int XPluginStart(
 	char* outDesc)
 {
 	strcpy(outName, "MotionPlatformData");
-	strcpy(outSig, "vAzhureRacingHub.motionplatformdata");
+	strcpy(outSig, "SDRacingHub.motionplatformdata");
 	strcpy(outDesc, "A plug-in that derives motion platform data from datarefs.");
 
 	initialize_shared_memory();

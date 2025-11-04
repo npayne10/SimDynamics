@@ -1,11 +1,22 @@
-# vAzhureRacingHub
-Application for Sim Racing Games. Supporting plugins and external devices via Serial Port
-![vAzhureRacingHub 09 06 2025 10_18_37](https://github.com/user-attachments/assets/d6042b7d-de50-4852-86ec-7aa70b714e90)
-![vAzhureRacingHub 09 06 2025 10_17_12](https://github.com/user-attachments/assets/35255aae-dcd6-4079-a659-d69bf89b591e)
-![vAzhureRacingHub 09 06 2025 10_17_53](https://github.com/user-attachments/assets/7deeaa70-29cc-43f3-b8a1-4128373b133d)
-![vAzhureRacingHub 09 06 2025 10_18_06](https://github.com/user-attachments/assets/861ae3d0-353d-4d71-b789-5ca2b0d0682a)
-![vAzhureRacingHub 09 06 2025 10_18_54](https://github.com/user-attachments/assets/42419e1a-3c94-438a-b47d-c98c370c2496)
-![vAzhureRacingHub 09 06 2025 10_20_10](https://github.com/user-attachments/assets/9e43c691-8e3f-4c9c-aecb-fc3a4d6f8354)
+# SDRacingHub
+Application for Sim Racing Games. Supporting plugins and external devices via Serial Port.
+
+## VS Code Quickstart
+
+1. Install the **.NET Framework 4.8 Developer Pack**, **Visual Studio Build Tools 2022** with the *.NET desktop* workload, and the **NuGet CLI**.
+2. Install the **C# Dev Kit** extension in VS Code (version 1.105 or later).
+3. Open the `SDRacingHub` folder in VS Code. The bundled tasks will automatically detect the `SDRacingHub.sln` solution.
+4. Run the `restore packages` task to download NuGet dependencies.
+5. Run the default `build SDRacingHub` task (or press <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>B</kbd>) to compile the WinForms application.
+6. Start debugging with the “.NET Framework Launch (SDRacingHub)” configuration, which launches `bin/Debug/SDRacingHub.exe` after building the solution.
+
+The `.vscode` folder contains ready-made `tasks.json`, `launch.json`, and `settings.json` files to streamline restores, builds, and debugging inside VS Code.
+![SDRacingHub 09 06 2025 10_18_37](https://github.com/user-attachments/assets/d6042b7d-de50-4852-86ec-7aa70b714e90)
+![SDRacingHub 09 06 2025 10_17_12](https://github.com/user-attachments/assets/35255aae-dcd6-4079-a659-d69bf89b591e)
+![SDRacingHub 09 06 2025 10_17_53](https://github.com/user-attachments/assets/7deeaa70-29cc-43f3-b8a1-4128373b133d)
+![SDRacingHub 09 06 2025 10_18_06](https://github.com/user-attachments/assets/861ae3d0-353d-4d71-b789-5ca2b0d0682a)
+![SDRacingHub 09 06 2025 10_18_54](https://github.com/user-attachments/assets/42419e1a-3c94-438a-b47d-c98c370c2496)
+![SDRacingHub 09 06 2025 10_20_10](https://github.com/user-attachments/assets/9e43c691-8e3f-4c9c-aecb-fc3a4d6f8354)
 
 Supported Game Titles:
 * Assetto Corsa

@@ -9,7 +9,7 @@ namespace iRacingPlugin
 
         public string Name => "iRacing";
 
-        public string Description => "Плагин iRacing для vAzhure Racing Hub\nАвтор: Журавлев Андрей";
+        public string Description => "Плагин iRacing для SDRacingHub\nАвтор: Журавлев Андрей";
 
         public ulong Version => 1L;
 

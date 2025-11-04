@@ -14,7 +14,7 @@ namespace rFactor2plugin
 
         public string Name => "rFactor 2";
 
-        public string Description => "Плагин Factor2 для vAzhure Racing Hub\nАвтор: Журавлев Андрей";
+        public string Description => "Плагин Factor2 для SDRacingHub\nАвтор: Журавлев Андрей";
 
         public ulong Version => 1U;
 

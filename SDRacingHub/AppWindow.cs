@@ -19,14 +19,14 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using vAzhureRacingAPI;
 
-namespace vAzhureRacingHub
+namespace SDRacingHub
 {
     /// <summary>
     /// Главное окно приложения
     /// </summary>
     public partial class AppWindow : MovableForm, IVAzhureRacingApp
     {
-        public static readonly string LocalApplicationData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "vAzhureRacingHub");
+        public static readonly string LocalApplicationData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "SDRacingHub");
         public static readonly string localSettingFile = Path.Combine(LocalApplicationData, "settings.json");
         public static readonly string localSettingPluginsPath = Path.Combine(LocalApplicationData, "Plugins");
 
@@ -475,7 +475,7 @@ namespace vAzhureRacingHub
         /// </summary>
         public void About()
         {
-            MessageBox.Show(this, "version 1.0.079\r\nRelease Date: 2025-09-20", "vAzhure Racing Hub");
+            MessageBox.Show(this, "version 1.0.079\r\nRelease Date: 2025-09-20", "SDRacingHub");
         }
 
         AppSettings settings = new AppSettings();

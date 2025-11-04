@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Windows.Forms;
 
-namespace vAzhureRacingHub
+namespace SDRacingHub
 {
     public partial class WebServerSettingsControl : SettingsControl
     {

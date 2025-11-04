@@ -1,5 +1,5 @@
 ﻿
-namespace vAzhureRacingHub
+namespace SDRacingHub
 {
     partial class SettingsForm
     {
@@ -48,7 +48,7 @@ namespace vAzhureRacingHub
             this.btnExit.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnExit.FlatAppearance.BorderSize = 0;
             this.btnExit.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnExit.Image = global::vAzhureRacingHub.Properties.Resources.close_window;
+            this.btnExit.Image = global::SDRacingHub.Properties.Resources.close_window;
             this.btnExit.Location = new System.Drawing.Point(742, 5);
             this.btnExit.Name = "btnExit";
             this.btnExit.Size = new System.Drawing.Size(40, 40);
@@ -64,7 +64,7 @@ namespace vAzhureRacingHub
             this.btnPlugins.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(56)))), ((int)(((byte)(56)))), ((int)(((byte)(56)))));
             this.btnPlugins.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(56)))), ((int)(((byte)(56)))), ((int)(((byte)(56)))));
             this.btnPlugins.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnPlugins.Image = global::vAzhureRacingHub.Properties.Resources.puzzle24;
+            this.btnPlugins.Image = global::SDRacingHub.Properties.Resources.puzzle24;
             this.btnPlugins.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
             this.btnPlugins.Location = new System.Drawing.Point(12, 48);
             this.btnPlugins.Name = "btnPlugins";
@@ -83,7 +83,7 @@ namespace vAzhureRacingHub
             this.btnGames.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(56)))), ((int)(((byte)(56)))), ((int)(((byte)(56)))));
             this.btnGames.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(56)))), ((int)(((byte)(56)))), ((int)(((byte)(56)))));
             this.btnGames.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnGames.Image = global::vAzhureRacingHub.Properties.Resources.game24px;
+            this.btnGames.Image = global::SDRacingHub.Properties.Resources.game24px;
             this.btnGames.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
             this.btnGames.Location = new System.Drawing.Point(12, 94);
             this.btnGames.Name = "btnGames";
@@ -102,7 +102,7 @@ namespace vAzhureRacingHub
             this.btnServer.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(56)))), ((int)(((byte)(56)))), ((int)(((byte)(56)))));
             this.btnServer.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(56)))), ((int)(((byte)(56)))), ((int)(((byte)(56)))));
             this.btnServer.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnServer.Image = global::vAzhureRacingHub.Properties.Resources.web24;
+            this.btnServer.Image = global::SDRacingHub.Properties.Resources.web24;
             this.btnServer.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
             this.btnServer.Location = new System.Drawing.Point(12, 140);
             this.btnServer.Name = "btnServer";

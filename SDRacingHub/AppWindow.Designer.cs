@@ -1,5 +1,5 @@
 ﻿
-namespace vAzhureRacingHub
+namespace SDRacingHub
 {
     partial class AppWindow
     {
@@ -50,7 +50,7 @@ namespace vAzhureRacingHub
             this.btnMinimize.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnMinimize.FlatAppearance.BorderSize = 0;
             this.btnMinimize.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnMinimize.Image = global::vAzhureRacingHub.Properties.Resources.collapse_window;
+            this.btnMinimize.Image = global::SDRacingHub.Properties.Resources.collapse_window;
             this.btnMinimize.Location = new System.Drawing.Point(638, 6);
             this.btnMinimize.Name = "btnMinimize";
             this.btnMinimize.Size = new System.Drawing.Size(40, 40);
@@ -65,7 +65,7 @@ namespace vAzhureRacingHub
             this.btnExpand.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnExpand.FlatAppearance.BorderSize = 0;
             this.btnExpand.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnExpand.Image = global::vAzhureRacingHub.Properties.Resources.expand_window;
+            this.btnExpand.Image = global::SDRacingHub.Properties.Resources.expand_window;
             this.btnExpand.Location = new System.Drawing.Point(684, 6);
             this.btnExpand.Name = "btnExpand";
             this.btnExpand.Size = new System.Drawing.Size(40, 40);
@@ -80,7 +80,7 @@ namespace vAzhureRacingHub
             this.btnExit.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnExit.FlatAppearance.BorderSize = 0;
             this.btnExit.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnExit.Image = global::vAzhureRacingHub.Properties.Resources.close_window;
+            this.btnExit.Image = global::SDRacingHub.Properties.Resources.close_window;
             this.btnExit.Location = new System.Drawing.Point(730, 6);
             this.btnExit.Name = "btnExit";
             this.btnExit.Size = new System.Drawing.Size(40, 40);
@@ -97,7 +97,7 @@ namespace vAzhureRacingHub
             this.toolTips.InitialDelay = 250;
             this.toolTips.ReshowDelay = 100;
             this.toolTips.ShowAlways = true;
-            this.toolTips.ToolTipTitle = "vAzhure Racing Hub";
+            this.toolTips.ToolTipTitle = "SDRacingHub";
             this.toolTips.UseAnimation = false;
             this.toolTips.UseFading = false;
             // 
@@ -139,7 +139,7 @@ namespace vAzhureRacingHub
             this.btnAbout.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnAbout.FlatAppearance.BorderSize = 0;
             this.btnAbout.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnAbout.Image = global::vAzhureRacingHub.Properties.Resources.info32px;
+            this.btnAbout.Image = global::SDRacingHub.Properties.Resources.info32px;
             this.btnAbout.Location = new System.Drawing.Point(12, 6);
             this.btnAbout.Name = "btnAbout";
             this.btnAbout.Size = new System.Drawing.Size(40, 40);
@@ -154,7 +154,7 @@ namespace vAzhureRacingHub
             this.btnSettings.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnSettings.FlatAppearance.BorderSize = 0;
             this.btnSettings.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnSettings.Image = global::vAzhureRacingHub.Properties.Resources.list32;
+            this.btnSettings.Image = global::SDRacingHub.Properties.Resources.list32;
             this.btnSettings.Location = new System.Drawing.Point(58, 6);
             this.btnSettings.Name = "btnSettings";
             this.btnSettings.Size = new System.Drawing.Size(40, 40);
