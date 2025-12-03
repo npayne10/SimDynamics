@@ -23,16 +23,19 @@ struct CarProfile {
   const char *name;
   float strokeMM;
   float homePercent;   // 0.0 - 1.0 of stroke
-  int   stepsPerRev;
+  float stepsPerRevScale; // multiplier applied to base driver setting
 };
 
-// Adjust the stroke and step settings below to tune each vehicle profile.
-static CarProfile PROFILE_F1   = { "F1 Car",   80.0f, 0.50f, 400 };
-static CarProfile PROFILE_GT3  = { "GT3 Car", 200.0f, 0.50f, 200 };
-static CarProfile PROFILE_RALLY= { "Rally Car",220.0f, 0.50f, 160 };
+// Base pulses-per-revolution setting on the HBS86H driver (adjust to match dip-switch configuration).
+static float HBS86H_STEPS_PER_REV = 2000.0f;
+
+// Adjust the stroke and stiffness scalars below to tune each vehicle profile.
+static CarProfile PROFILE_F1   = { "F1 Car",   80.0f, 0.50f, 1.20f }; // slightly stiffer (more steps per mm)
+static CarProfile PROFILE_GT3  = { "GT3 Car", 200.0f, 0.50f, 1.00f }; // baseline driver steps
+static CarProfile PROFILE_RALLY= { "Rally Car",220.0f, 0.50f, 0.80f }; // softer (fewer steps per mm)
 
 static const float LEAD_MM_PER_REV = 5.0f;
-static const int   MICROSTEPS      = 16;
+static const int   MICROSTEPS      = 1; // already included in the driver step configuration
 
 static CarProfile *currentProfile = &PROFILE_GT3;
 
@@ -42,7 +45,7 @@ static float minPosMM       = 0.0f;     // home at bottom limit
 static float maxPosMM       = minPosMM + strokeMM;
 static float homePositionMM = minPosMM + (strokeMM * homePercent);
 
-static int   stepsPerRev    = PROFILE_GT3.stepsPerRev;
+static float stepsPerRev    = HBS86H_STEPS_PER_REV * PROFILE_GT3.stepsPerRevScale;
 static float stepsPerMM     = (stepsPerRev * MICROSTEPS) / LEAD_MM_PER_REV;
 
 // Motion settings
@@ -119,7 +122,7 @@ static void applyCarProfile(CarProfile *profile) {
   currentProfile = profile;
   strokeMM = profile->strokeMM;
   homePercent = profile->homePercent;
-  stepsPerRev = profile->stepsPerRev;
+  stepsPerRev = HBS86H_STEPS_PER_REV * profile->stepsPerRevScale;
   updateDerivedMotionParameters();
 }
 
