@@ -28,6 +28,7 @@ struct CarProfile {
 
 // Base pulses-per-revolution setting on the HBS86H driver (adjust to match dip-switch configuration).
 static float HBS86H_STEPS_PER_REV = 2000.0f;
+static const float ACTUATOR_MAX_STROKE_MM = 85.0f; // physical travel limit of each actuator
 
 // Adjust the stroke and stiffness scalars below to tune each vehicle profile.
 static CarProfile PROFILE_F1   = { "F1 Car",   80.0f, 0.50f, 1.20f }; // slightly stiffer (more steps per mm)

@@ -4,3 +4,6 @@ This is for the documents and code for the SimDynamics 3DOF Actuator Simulator a
 ## Wiring
 - `docs/wiring-diagram.pdf` shows the Arduino Mega 2560 wiring to four HBS86H drivers and their limit switches.
 - Regenerate the PDF by running `python docs/wiring_diagram.py`; the script writes PDF primitives directly so it has no external dependencies.
+
+## Actuator limits
+- The sketch enforces an 85 mm maximum physical stroke for each actuator; car profile stroke requests above this are clamped to protect hardware travel.
