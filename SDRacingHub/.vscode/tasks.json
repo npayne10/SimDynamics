@@ -1,0 +1,40 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "restore packages",
+            "type": "shell",
+            "command": "nuget",
+            "args": [
+                "restore",
+                "SDRacingHub.sln"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "build SDRacingHub",
+            "type": "shell",
+            "command": "msbuild",
+            "args": [
+                "SDRacingHub.sln",
+                "/t:Build",
+                "/p:Configuration=Debug",
+                "/p:Platform=Any CPU"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$msCompile"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "dependsOn": "restore packages"
+        }
+    ]
+}
