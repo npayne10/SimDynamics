@@ -8,7 +8,7 @@ This folder contains a standalone Arduino sketch for using an Arduino Leonardo a
 ## Key behavior
 - Uses a single HX711 sample in the runtime loop for lower latency.
 - Provides hold-low-on-boot calibration mode (`CAL_PIN`, default pin 4).
-- Reports handbrake position on joystick Z axis (`0..1023`).
+- Reports handbrake position on joystick Y axis (`0..1023`) to avoid common steering-wheel X-axis overlap in game bindings.
 
 ## Changing the USB device name shown in Windows
 
