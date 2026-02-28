@@ -3,6 +3,11 @@
 #include <EEPROM.h>
 #include <math.h>
 
+
+// USB product name note:
+// On ATmega32u4 boards (Leonardo), the name shown in Windows comes from the
+// core build flag USB_PRODUCT (boards.txt), not this sketch source file.
+
 // ---------------- Pins ----------------
 static const uint8_t HX_DOUT = 3;   // HX711 DT
 static const uint8_t HX_SCK  = 2;   // HX711 SCK
@@ -23,7 +28,7 @@ Joystick_ Joystick(
   JOYSTICK_DEFAULT_REPORT_ID,
   JOYSTICK_TYPE_JOYSTICK,
   0, 0,
-  false, false, true,   // X,Y,Z
+  false, true, false,   // X,Y,Z (handbrake mapped to Y to avoid common X-axis conflicts)
   false, false, false,
   false, false, false,
   false, false
@@ -127,7 +132,7 @@ void setup() {
   while (!Serial) {}
 
   Serial.println("\nHandbrake Load Cell + HID (FAST) (Leonardo)");
-  Serial.println("Cols: raw\tkg\tfiltered\taxis");
+  Serial.println("Cols: raw\tkg\tfiltered\taxisY");
 
   scale.begin(HX_DOUT, HX_SCK);
 
@@ -149,7 +154,7 @@ void setup() {
   scale.set_scale(CAL_FACTOR);
   scale.tare(20);
 
-  Joystick.setZAxisRange(0, 1023);
+  Joystick.setYAxisRange(0, 1023);
   Joystick.begin();
 }
 
@@ -166,8 +171,8 @@ void loop() {
   norm = clamp01(norm);
   if (GAMMA != 1.0f) norm = pow(norm, GAMMA);
 
-  int z = static_cast<int>(norm * 1023.0f + 0.5f);
-  Joystick.setZAxis(z);
+  int axisValue = static_cast<int>(norm * 1023.0f + 0.5f);
+  Joystick.setYAxis(axisValue);
 
   // Throttle serial so printing doesn't slow the loop
   static uint32_t lastPrintMs = 0;
@@ -180,6 +185,6 @@ void loop() {
     Serial.print('\t');
     Serial.print(filteredForce, 2);
     Serial.print('\t');
-    Serial.println(z);
+    Serial.println(axisValue);
   }
 }
