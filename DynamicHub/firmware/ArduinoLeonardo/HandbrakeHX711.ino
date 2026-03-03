@@ -3,7 +3,6 @@
 #include <EEPROM.h>
 #include <math.h>
 
-
 // USB product name note:
 // On ATmega32u4 boards (Leonardo), the name shown in Windows comes from the
 // core build flag USB_PRODUCT (boards.txt), not this sketch source file.
@@ -24,14 +23,15 @@ float GAMMA      = 1.2f;    // reduce for more immediate bite (try 1.0..1.3)
 float filteredForce = 0.0f;
 
 // --------------- Joystick --------------
+// Report as BRAKE axis (0..1023) instead of centered XY-style stick axes.
 Joystick_ Joystick(
   JOYSTICK_DEFAULT_REPORT_ID,
   JOYSTICK_TYPE_JOYSTICK,
   0, 0,
-  false, true, false,   // X,Y,Z (handbrake mapped to Y to avoid common X-axis conflicts)
-  false, false, false,
-  false, false, false,
-  false, false
+  false, false, false, // X,Y,Z
+  false, false, false, // Rx,Ry,Rz
+  false, false, false, // Rudder,Throttle,Accelerator
+  true, false          // Brake,Steering
 );
 
 // --------------- EEPROM layout ----------
@@ -129,10 +129,11 @@ void setup() {
   pinMode(CAL_PIN, INPUT_PULLUP);
 
   Serial.begin(115200);
-  while (!Serial) {}
+  // Do not block on while(!Serial) because that can prevent HID from starting
+  // until the serial monitor is opened.
 
   Serial.println("\nHandbrake Load Cell + HID (FAST) (Leonardo)");
-  Serial.println("Cols: raw\tkg\tfiltered\taxisY");
+  Serial.println("Cols: raw\tkg\tfiltered\tbrakeAxis");
 
   scale.begin(HX_DOUT, HX_SCK);
 
@@ -154,7 +155,7 @@ void setup() {
   scale.set_scale(CAL_FACTOR);
   scale.tare(20);
 
-  Joystick.setYAxisRange(0, 1023);
+  Joystick.setBrakeRange(0, 1023);
   Joystick.begin();
 }
 
@@ -172,7 +173,7 @@ void loop() {
   if (GAMMA != 1.0f) norm = pow(norm, GAMMA);
 
   int axisValue = static_cast<int>(norm * 1023.0f + 0.5f);
-  Joystick.setYAxis(axisValue);
+  Joystick.setBrake(axisValue);
 
   // Throttle serial so printing doesn't slow the loop
   static uint32_t lastPrintMs = 0;

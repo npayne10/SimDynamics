@@ -8,7 +8,13 @@ This folder contains a standalone Arduino sketch for using an Arduino Leonardo a
 ## Key behavior
 - Uses a single HX711 sample in the runtime loop for lower latency.
 - Provides hold-low-on-boot calibration mode (`CAL_PIN`, default pin 4).
-- Reports handbrake position on joystick Y axis (`0..1023`) to avoid common steering-wheel X-axis overlap in game bindings.
+- Reports handbrake position on the HID **Brake axis** (`0..1023`) instead of a centered X/Y stick axis.
+- Does **not** block on `while (!Serial)`, so HID starts even when Arduino Serial Monitor is closed.
+
+## Why Brake axis instead of Y axis?
+Some games and Windows control panels expect X/Y-style axes to be centered around mid-point. A handbrake is naturally
+one-directional (`0 -> 100%`), so exposing it as **Brake** avoids forced centering behavior and usually appears more
+reliably in racing game input binding pages.
 
 ## Changing the USB device name shown in Windows
 
