@@ -11,6 +11,8 @@
 static const uint8_t HX_DOUT = 3;   // HX711 DT
 static const uint8_t HX_SCK  = 2;   // HX711 SCK
 static const uint8_t CAL_PIN = 4;   // Hold LOW at boot to enter calibration mode
+static const uint8_t LED_BRAKE_PIN = 5; // ON when handbrake force is applied
+static const uint8_t LED_CONN_PIN  = 6; // ON when USB is configured by host
 
 HX711 scale;
 
@@ -23,12 +25,13 @@ float GAMMA      = 1.2f;    // reduce for more immediate bite (try 1.0..1.3)
 float filteredForce = 0.0f;
 
 // --------------- Joystick --------------
-// Report as BRAKE axis (0..1023) instead of centered XY-style stick axes.
+// Compatibility mode: expose both Z + Brake so more games can detect/bind it.
+// Keep X present and centered to satisfy software that expects at least one centered axis.
 Joystick_ Joystick(
   JOYSTICK_DEFAULT_REPORT_ID,
-  JOYSTICK_TYPE_JOYSTICK,
+  JOYSTICK_TYPE_GAMEPAD,
   0, 0,
-  false, false, false, // X,Y,Z
+  true, false, true,   // X,Y,Z
   false, false, false, // Rx,Ry,Rz
   false, false, false, // Rudder,Throttle,Accelerator
   true, false          // Brake,Steering
@@ -59,6 +62,16 @@ bool loadCal(float &calFactorOut) {
   if (!isfinite(d.calFactor) || fabs(d.calFactor) < 1.0f) return false;
   calFactorOut = d.calFactor;
   return true;
+}
+
+
+
+static bool isUsbConfigured() {
+#if defined(USBCON)
+  return USBDevice.configured();
+#else
+  return true;
+#endif
 }
 
 String readLine() {
@@ -127,13 +140,17 @@ void calibrationMode() {
 
 void setup() {
   pinMode(CAL_PIN, INPUT_PULLUP);
+  pinMode(LED_BRAKE_PIN, OUTPUT);
+  pinMode(LED_CONN_PIN, OUTPUT);
+  digitalWrite(LED_BRAKE_PIN, LOW);
+  digitalWrite(LED_CONN_PIN, LOW);
 
   Serial.begin(115200);
   // Do not block on while(!Serial) because that can prevent HID from starting
   // until the serial monitor is opened.
 
   Serial.println("\nHandbrake Load Cell + HID (FAST) (Leonardo)");
-  Serial.println("Cols: raw\tkg\tfiltered\tbrakeAxis");
+  Serial.println("Cols: raw\tkg\tfiltered\taxisZ/brake\tconn");
 
   scale.begin(HX_DOUT, HX_SCK);
 
@@ -155,8 +172,17 @@ void setup() {
   scale.set_scale(CAL_FACTOR);
   scale.tare(20);
 
+  Joystick.setXAxisRange(0, 1023);
+  Joystick.setZAxisRange(0, 1023);
   Joystick.setBrakeRange(0, 1023);
   Joystick.begin();
+
+  // Keep compatibility X axis centered at startup.
+  Joystick.setXAxis(512);
+
+  // Initial LED states after HID start.
+  digitalWrite(LED_CONN_PIN, isUsbConfigured() ? HIGH : LOW);
+  digitalWrite(LED_BRAKE_PIN, LOW);
 }
 
 void loop() {
@@ -173,7 +199,16 @@ void loop() {
   if (GAMMA != 1.0f) norm = pow(norm, GAMMA);
 
   int axisValue = static_cast<int>(norm * 1023.0f + 0.5f);
+  Joystick.setZAxis(axisValue);
   Joystick.setBrake(axisValue);
+
+  // LED indicators
+  const bool brakeActive = axisValue > 10;
+  digitalWrite(LED_BRAKE_PIN, brakeActive ? HIGH : LOW);
+  digitalWrite(LED_CONN_PIN, isUsbConfigured() ? HIGH : LOW);
+
+  // Maintain centered X axis for consumers that expect a centering axis.
+  Joystick.setXAxis(512);
 
   // Throttle serial so printing doesn't slow the loop
   static uint32_t lastPrintMs = 0;
@@ -186,6 +221,8 @@ void loop() {
     Serial.print('\t');
     Serial.print(filteredForce, 2);
     Serial.print('\t');
-    Serial.println(axisValue);
+    Serial.print(axisValue);
+    Serial.print('\t');
+    Serial.println(isUsbConfigured() ? 1 : 0);
   }
 }

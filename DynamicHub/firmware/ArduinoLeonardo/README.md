@@ -8,13 +8,16 @@ This folder contains a standalone Arduino sketch for using an Arduino Leonardo a
 ## Key behavior
 - Uses a single HX711 sample in the runtime loop for lower latency.
 - Provides hold-low-on-boot calibration mode (`CAL_PIN`, default pin 4).
-- Reports handbrake position on the HID **Brake axis** (`0..1023`) instead of a centered X/Y stick axis.
+- Reports handbrake position on both HID **Z axis** and **Brake axis** (`0..1023`) for better game compatibility.
 - Does **not** block on `while (!Serial)`, so HID starts even when Arduino Serial Monitor is closed.
+- Drives two optional status LEDs:
+  - `D5` (**Brake LED**) turns ON when handbrake value is above a small threshold.
+  - `D6` (**Connection LED**) turns ON when USB is configured by the host (PC).
 
-## Why Brake axis instead of Y axis?
-Some games and Windows control panels expect X/Y-style axes to be centered around mid-point. A handbrake is naturally
-one-directional (`0 -> 100%`), so exposing it as **Brake** avoids forced centering behavior and usually appears more
-reliably in racing game input binding pages.
+## Why Z + Brake compatibility mode?
+Some games ignore vendor-specific brake-only HID layouts, while others bind best to brake/slider-style inputs.
+This sketch exposes **both Z and Brake** from the same handbrake value and keeps X centered, which improves detection
+in titles that expect at least one centered stick axis during device discovery.
 
 ## Changing the USB device name shown in Windows
 
@@ -38,3 +41,10 @@ Create a custom board variant (copy Leonardo section in `boards.txt` to e.g. `dy
 This avoids editing upstream Leonardo defaults directly.
 
 > Note: existing Windows HID entries may keep a cached friendly name until you remove old device instances.
+
+## LED wiring note
+Connect each LED (with resistor, e.g. 220Ω-1kΩ) from the pin to GND if you want ON=HIGH behavior:
+- D5 -> resistor -> LED anode, LED cathode -> GND
+- D6 -> resistor -> LED anode, LED cathode -> GND
+
+`D6` indicates USB enumeration/configuration, not whether a specific game has currently bound the axis.
