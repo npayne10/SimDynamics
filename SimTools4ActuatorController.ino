@@ -14,40 +14,6 @@ static const uint8_t MIN_LIMIT_PIN[AXES] = { 34, 36, 38, 40 };
 static const bool LIMIT_ACTIVE_LOW = true;  // LOW when switch is pressed
 static const unsigned long LIMIT_DEBOUNCE_MS = 5;
 
-// Car profile selection (hardware switches are active LOW)
-static const uint8_t CAR_TYPE_PIN_F1   = 42;
-static const uint8_t CAR_TYPE_PIN_GT3  = 43;
-static const uint8_t CAR_TYPE_PIN_RALLY= 44;
-
-struct CarProfile {
-  const char *name;
-  float strokeMM;
-  float homePercent;   // 0.0 - 1.0 of stroke
-  float stepsPerRevScale; // multiplier applied to base driver setting
-};
-
-// Base pulses-per-revolution setting on the HBS86H driver (adjust to match dip-switch configuration).
-static float HBS86H_STEPS_PER_REV = 2000.0f;
-static const float ACTUATOR_MAX_STROKE_MM = 85.0f; // physical travel limit of each actuator
-
-// Adjust the stroke and stiffness scalars below to tune each vehicle profile.
-static CarProfile PROFILE_F1   = { "F1 Car",   80.0f, 0.50f, 1.20f }; // slightly stiffer (more steps per mm)
-static CarProfile PROFILE_GT3  = { "GT3 Car", 200.0f, 0.50f, 1.00f }; // baseline driver steps
-static CarProfile PROFILE_RALLY= { "Rally Car",220.0f, 0.50f, 0.80f }; // softer (fewer steps per mm)
-
-static const float LEAD_MM_PER_REV = 5.0f;
-static const int   MICROSTEPS      = 1; // already included in the driver step configuration
-
-static CarProfile *currentProfile = &PROFILE_GT3;
-
-static float strokeMM       = PROFILE_GT3.strokeMM;
-static float homePercent    = PROFILE_GT3.homePercent;
-static float minPosMM       = 0.0f;     // home at bottom limit
-static float maxPosMM       = minPosMM + strokeMM;
-static float homePositionMM = minPosMM + (strokeMM * homePercent);
-
-static float stepsPerRev    = HBS86H_STEPS_PER_REV * PROFILE_GT3.stepsPerRevScale;
-static float stepsPerMM     = (stepsPerRev * MICROSTEPS) / LEAD_MM_PER_REV;
 // Mechanics
 static const float LEAD_MM_PER_REV = 5.0f;
 static const int   STEPS_PER_REV   = 200;
@@ -65,10 +31,6 @@ static const float HOME_SPEED_MM_S = 20.0f;    // approach speed towards bottom
 static const float HOME_BACKOFF_MM = 3.0f;     // lift off switch after homing
 
 // Self-test motion envelope
-static const float SELFTEST_BASE_FACTOR  = 0.5f;
-static const float SELFTEST_ROLL_FACTOR  = 0.25f;
-static const float SELFTEST_PITCH_FACTOR = 0.25f;
-static const float SELFTEST_HEAVE_FACTOR = 0.20f;
 static const float SELFTEST_BASE_MM    = MIN_POS_MM + (STROKE_MM * 0.5f);
 static const float SELFTEST_ROLL_MM    = STROKE_MM * 0.25f;
 static const float SELFTEST_PITCH_MM   = STROKE_MM * 0.25f;
@@ -83,9 +45,6 @@ static const bool SERIAL_ECHO = false;
 static const unsigned long COMM_WATCHDOG_TIMEOUT_MS = 60UL * 1000UL;
 
 // ----------------------------------------------------------------------------
-static float maxSpeedStepsPerSec = MAX_SPEED_MM_S * stepsPerMM;
-static float accelStepsPerSec2    = ACCEL_MM_S2 * stepsPerMM;
-// ----------------------------------------------------------------------------
 static const float MAX_SPEED_STEPS_S = MAX_SPEED_MM_S * STEPS_PER_MM;
 static const float ACCEL_STEPS_S2    = ACCEL_MM_S2 * STEPS_PER_MM;
 
@@ -96,8 +55,6 @@ AccelStepper steppers[AXES] = {
   AccelStepper(AccelStepper::DRIVER, STEP_PIN[3], DIR_PIN[3])
 };
 
-float targetMM[AXES];
-long  targetSteps[AXES];
 float targetMM[AXES] = { MIN_POS_MM, MIN_POS_MM, MIN_POS_MM, MIN_POS_MM };
 long  targetSteps[AXES] = { 0, 0, 0, 0 };
 
@@ -108,11 +65,7 @@ String serialBuffer;
 
 unsigned long lastCommandReceived = 0;
 bool watchdogReturnActive = false;
-uint8_t rollingAxisCursor = 0;
 
-// ----------------------------------------------------------------------------
-static inline float mmToSteps(float mm) { return mm * stepsPerMM; }
-static inline float stepsToMM(long steps) { return steps / stepsPerMM; }
 // ----------------------------------------------------------------------------
 static inline float mmToSteps(float mm) { return mm * STEPS_PER_MM; }
 static inline float stepsToMM(long steps) { return steps / STEPS_PER_MM; }
@@ -124,85 +77,6 @@ static inline float clampFloat(float v, float lo, float hi) {
 }
 
 static float clampToStroke(float mm) {
-  return clampFloat(mm, minPosMM, maxPosMM);
-}
-
-static void updateDerivedMotionParameters() {
-  if (homePercent < 0.0f) homePercent = 0.0f;
-  if (homePercent > 1.0f) homePercent = 1.0f;
-  stepsPerMM = (stepsPerRev * MICROSTEPS) / LEAD_MM_PER_REV;
-  maxPosMM = minPosMM + strokeMM;
-  homePositionMM = minPosMM + (strokeMM * homePercent);
-  maxSpeedStepsPerSec = MAX_SPEED_MM_S * stepsPerMM;
-  accelStepsPerSec2 = ACCEL_MM_S2 * stepsPerMM;
-}
-
-static void applyCarProfile(CarProfile *profile) {
-  if (!profile) {
-    return;
-  }
-  currentProfile = profile;
-  strokeMM = profile->strokeMM;
-  homePercent = profile->homePercent;
-  stepsPerRev = HBS86H_STEPS_PER_REV * profile->stepsPerRevScale;
-  updateDerivedMotionParameters();
-}
-
-static void printCurrentProfile() {
-  if (!currentProfile) return;
-  Serial.print(F("Selected profile: "));
-  Serial.println(currentProfile->name);
-  Serial.print(F("  Stroke (mm): "));
-  Serial.println(strokeMM, 1);
-  Serial.print(F("  Home position (mm): "));
-  Serial.println(homePositionMM, 1);
-  Serial.print(F("  Steps/rev: "));
-  Serial.println(stepsPerRev);
-  Serial.print(F("  Steps/mm: "));
-  Serial.println(stepsPerMM, 3);
-}
-
-static CarProfile* detectCarProfileFromSwitches() {
-  if (digitalRead(CAR_TYPE_PIN_F1) == LOW) {
-    return &PROFILE_F1;
-  }
-  if (digitalRead(CAR_TYPE_PIN_GT3) == LOW) {
-    return &PROFILE_GT3;
-  }
-  if (digitalRead(CAR_TYPE_PIN_RALLY) == LOW) {
-    return &PROFILE_RALLY;
-  }
-  // Default profile when no switch is asserted.
-  return &PROFILE_GT3;
-}
-
-static void configureCarProfileFromSwitches() {
-  pinMode(CAR_TYPE_PIN_F1, INPUT_PULLUP);
-  pinMode(CAR_TYPE_PIN_GT3, INPUT_PULLUP);
-  pinMode(CAR_TYPE_PIN_RALLY, INPUT_PULLUP);
-
-  // allow signals to settle
-  delay(5);
-
-  CarProfile *selected = detectCarProfileFromSwitches();
-  applyCarProfile(selected);
-  printCurrentProfile();
-}
-
-static float selfTestBaseMM() {
-  return clampToStroke(minPosMM + (strokeMM * SELFTEST_BASE_FACTOR));
-}
-
-static float selfTestRollMM() {
-  return strokeMM * SELFTEST_ROLL_FACTOR;
-}
-
-static float selfTestPitchMM() {
-  return strokeMM * SELFTEST_PITCH_FACTOR;
-}
-
-static float selfTestHeaveMM() {
-  return strokeMM * SELFTEST_HEAVE_FACTOR;
   return clampFloat(mm, MIN_POS_MM, MAX_POS_MM);
 }
 
@@ -233,9 +107,6 @@ static void homeAxis(uint8_t axis) {
   Serial.print(F("Homing axis ")); Serial.println(axis);
 
   // configure for homing speed towards negative direction
-  float homeSpeedSteps = HOME_SPEED_MM_S * stepsPerMM;
-  steppers[axis].setMaxSpeed(homeSpeedSteps);
-  steppers[axis].setAcceleration(accelStepsPerSec2);
   float homeSpeedSteps = HOME_SPEED_MM_S * STEPS_PER_MM;
   steppers[axis].setMaxSpeed(homeSpeedSteps);
   steppers[axis].setAcceleration(ACCEL_STEPS_S2);
@@ -248,7 +119,6 @@ static void homeAxis(uint8_t axis) {
   }
 
   // reached bottom -> set current position to zero
-  steppers[axis].setCurrentPosition(lround(mmToSteps(minPosMM)));
   steppers[axis].setCurrentPosition(lround(mmToSteps(MIN_POS_MM)));
 
   // lift up slightly to release switch
@@ -259,10 +129,6 @@ static void homeAxis(uint8_t axis) {
     sampleLimits();
   }
 
-  float postHome = minPosMM + HOME_BACKOFF_MM;
-  targetMM[axis] = postHome;
-  targetSteps[axis] = lround(mmToSteps(postHome));
-  steppers[axis].setMaxSpeed(maxSpeedStepsPerSec);
   float postHome = MIN_POS_MM + HOME_BACKOFF_MM;
   targetMM[axis] = postHome;
   targetSteps[axis] = lround(mmToSteps(postHome));
@@ -304,47 +170,10 @@ static int extractAxisValue(const String &token) {
   return -1;
 }
 
-static bool extractAxisIndexAndValue(const String &token, uint8_t &axisIndex, int &axisValue) {
-  axisIndex = 255;
-  axisValue = -1;
-
-  int prefixStart = token.indexOf("<A");
-  if (prefixStart < 0) {
-    return false;
-  }
-
-  int idStart = prefixStart + 2;
-  int len = token.length();
-  int idEnd = idStart;
-  while (idEnd < len && isDigit(token[idEnd])) {
-    ++idEnd;
-  }
-  if (idEnd == idStart) {
-    return false;
-  }
-
-  long axisNumber = token.substring(idStart, idEnd).toInt();
-  if (axisNumber < 1 || axisNumber > AXES) {
-    return false;
-  }
-
-  int closeBracket = token.indexOf('>', idEnd);
-  int valueStart = (closeBracket >= 0) ? (closeBracket + 1) : idEnd;
-  String remainder = token.substring(valueStart);
-  int value = extractAxisValue(remainder);
-  if (value < 0) {
-    return false;
-  }
-
-  axisIndex = static_cast<uint8_t>(axisNumber - 1);
-  axisValue = value;
-  return true;
-}
-
 static float simtoolsValueToMM(int value) {
   value = constrain(value, 0, 255);
   float t = value / 255.0f;
-  return minPosMM + t * (maxPosMM - minPosMM);
+  return MIN_POS_MM + t * (MAX_POS_MM - MIN_POS_MM);
 }
 
 static void setAllTargetsTo(float mm) {
@@ -358,14 +187,9 @@ static void setAllTargetsTo(float mm) {
 }
 
 static void triggerWatchdogReturn() {
-  Serial.print(F("Watchdog timeout: returning actuators to home (mm): "));
-  Serial.println(homePositionMM, 1);
-  setAllTargetsTo(homePositionMM);
+  Serial.println(F("Watchdog timeout: returning actuators to home."));
+  setAllTargetsTo(MIN_POS_MM + HOME_BACKOFF_MM);
   watchdogReturnActive = true;
-static float simtoolsValueToMM(int value) {
-  value = constrain(value, 0, 255);
-  float t = value / 255.0f;
-  return MIN_POS_MM + t * (MAX_POS_MM - MIN_POS_MM);
 }
 
 static void parseSerial() {
@@ -378,28 +202,6 @@ static void parseSerial() {
     while ((tildeIndex = serialBuffer.indexOf('~')) != -1) {
       String token = serialBuffer.substring(0, tildeIndex);
       serialBuffer.remove(0, tildeIndex + 1);
-      token.trim();
-      if (token.length() == 0) {
-        continue;
-      }
-
-      uint8_t axisIndex = 255;
-      int axisValue = -1;
-      bool parsed = extractAxisIndexAndValue(token, axisIndex, axisValue);
-      if (!parsed) {
-        axisValue = extractAxisValue(token);
-        if (axisValue >= 0) {
-          axisIndex = rollingAxisCursor;
-          rollingAxisCursor = (rollingAxisCursor + 1) % AXES;
-        }
-      }
-
-      if (axisValue >= 0 && axisIndex < AXES) {
-        float mm = simtoolsValueToMM(axisValue);
-        targetMM[axisIndex] = clampFloat(mm, minPosMM, maxPosMM);
-        rollingAxisCursor = (axisIndex + 1) % AXES;
-        lastCommandReceived = millis();
-        watchdogReturnActive = false;
 
       static uint8_t axis = 0;
       int axisValue = extractAxisValue(token);
@@ -407,6 +209,8 @@ static void parseSerial() {
         float mm = simtoolsValueToMM(axisValue);
         targetMM[axis] = clampFloat(mm, MIN_POS_MM, MAX_POS_MM);
         axis = (axis + 1) % AXES;
+        lastCommandReceived = millis();
+        watchdogReturnActive = false;
       }
 
       if (serialBuffer.length() > 64) {
@@ -418,7 +222,6 @@ static void parseSerial() {
 
 static void updateTargets() {
   for (uint8_t i = 0; i < AXES; ++i) {
-    float desired = clampFloat(targetMM[i], minPosMM, maxPosMM);
     float desired = clampFloat(targetMM[i], MIN_POS_MM, MAX_POS_MM);
 
     // If bottom limit is active, do not allow further downward motion.
@@ -476,7 +279,6 @@ static void performLimitTest() {
   Serial.println(F("Self-test: limit sweep to top."));
   float topTargets[AXES];
   for (uint8_t i = 0; i < AXES; ++i) {
-    topTargets[i] = maxPosMM;
     topTargets[i] = MAX_POS_MM;
   }
   moveToPositionsBlocking(topTargets);
@@ -485,7 +287,6 @@ static void performLimitTest() {
   Serial.println(F("Self-test: limit sweep to bottom."));
   float bottomTargets[AXES];
   for (uint8_t i = 0; i < AXES; ++i) {
-    bottomTargets[i] = minPosMM + HOME_BACKOFF_MM;
     bottomTargets[i] = MIN_POS_MM + HOME_BACKOFF_MM;
   }
   moveToPositionsBlocking(bottomTargets);
@@ -494,13 +295,6 @@ static void performLimitTest() {
 
 static void performRollTest() {
   Serial.println(F("Self-test: roll motion."));
-  float base = selfTestBaseMM();
-  float roll = selfTestRollMM();
-  float rollUp[AXES] = {
-    clampToStroke(base + roll),
-    clampToStroke(base - roll),
-    clampToStroke(base + roll),
-    clampToStroke(base - roll)
   float rollUp[AXES] = {
     clampToStroke(SELFTEST_BASE_MM + SELFTEST_ROLL_MM),
     clampToStroke(SELFTEST_BASE_MM - SELFTEST_ROLL_MM),
@@ -511,10 +305,6 @@ static void performRollTest() {
   pauseForSettle();
 
   float rollDown[AXES] = {
-    clampToStroke(base - roll),
-    clampToStroke(base + roll),
-    clampToStroke(base - roll),
-    clampToStroke(base + roll)
     clampToStroke(SELFTEST_BASE_MM - SELFTEST_ROLL_MM),
     clampToStroke(SELFTEST_BASE_MM + SELFTEST_ROLL_MM),
     clampToStroke(SELFTEST_BASE_MM - SELFTEST_ROLL_MM),
@@ -526,13 +316,6 @@ static void performRollTest() {
 
 static void performPitchTest() {
   Serial.println(F("Self-test: pitch motion."));
-  float base = selfTestBaseMM();
-  float pitch = selfTestPitchMM();
-  float pitchForward[AXES] = {
-    clampToStroke(base + pitch),
-    clampToStroke(base + pitch),
-    clampToStroke(base - pitch),
-    clampToStroke(base - pitch)
   float pitchForward[AXES] = {
     clampToStroke(SELFTEST_BASE_MM + SELFTEST_PITCH_MM),
     clampToStroke(SELFTEST_BASE_MM + SELFTEST_PITCH_MM),
@@ -543,10 +326,6 @@ static void performPitchTest() {
   pauseForSettle();
 
   float pitchBackward[AXES] = {
-    clampToStroke(base - pitch),
-    clampToStroke(base - pitch),
-    clampToStroke(base + pitch),
-    clampToStroke(base + pitch)
     clampToStroke(SELFTEST_BASE_MM - SELFTEST_PITCH_MM),
     clampToStroke(SELFTEST_BASE_MM - SELFTEST_PITCH_MM),
     clampToStroke(SELFTEST_BASE_MM + SELFTEST_PITCH_MM),
@@ -558,13 +337,6 @@ static void performPitchTest() {
 
 static void performHeaveTest() {
   Serial.println(F("Self-test: heave motion."));
-  float base = selfTestBaseMM();
-  float heave = selfTestHeaveMM();
-  float heaveUp[AXES];
-  float heaveDown[AXES];
-  for (uint8_t i = 0; i < AXES; ++i) {
-    heaveUp[i] = clampToStroke(base + heave);
-    heaveDown[i] = clampToStroke(base - heave);
   float heaveUp[AXES];
   float heaveDown[AXES];
   for (uint8_t i = 0; i < AXES; ++i) {
@@ -585,9 +357,6 @@ static void runSelfTest() {
   performHeaveTest();
 
   float neutral[AXES];
-  float base = selfTestBaseMM();
-  for (uint8_t i = 0; i < AXES; ++i) {
-    neutral[i] = clampToStroke(base);
   for (uint8_t i = 0; i < AXES; ++i) {
     neutral[i] = clampToStroke(SELFTEST_BASE_MM);
   }
@@ -601,8 +370,6 @@ void setup() {
   Serial.begin(SERIAL_BAUD);
   while (!Serial) {}
 
-  configureCarProfileFromSwitches();
-
   for (uint8_t i = 0; i < AXES; ++i) {
     pinMode(STEP_PIN[i], OUTPUT);
     pinMode(DIR_PIN[i], OUTPUT);
@@ -612,20 +379,6 @@ void setup() {
   enableDrivers(true);
 
   for (uint8_t i = 0; i < AXES; ++i) {
-    steppers[i].setMaxSpeed(maxSpeedStepsPerSec);
-    steppers[i].setAcceleration(accelStepsPerSec2);
-  }
-
-  setAllTargetsTo(homePositionMM);
-
-  sampleLimits();
-  homeAll();
-
-  float homeTargets[AXES];
-  for (uint8_t i = 0; i < AXES; ++i) {
-    homeTargets[i] = clampToStroke(homePositionMM);
-  }
-  moveToPositionsBlocking(homeTargets);
     steppers[i].setMaxSpeed(MAX_SPEED_STEPS_S);
     steppers[i].setAcceleration(ACCEL_STEPS_S2);
   }
